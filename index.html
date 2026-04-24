@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>For My Cutiepie</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root { --accent-pink: #ff4d6d; --glow-pink: #ff7eb3; --dark-bg: #0b0111; }
+        body, html { margin: 0; padding: 0; height: 100%; width: 100%; font-family: 'Poppins', sans-serif; background: var(--dark-bg); color: white; overflow: hidden; text-align: center; touch-action: manipulation; }
+        
+        /* Background Tiny Stars */
+        #stars-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+        .tiny-star { position: absolute; background: white; border-radius: 50%; animation: twinkle var(--duration) infinite ease-in-out; }
+        @keyframes twinkle { 0%, 100% { opacity: 0.3; transform: scale(1); } 50% { opacity: 0.8; transform: scale(1.2); } }
+
+        /* Big Yellow Stars (IMG_0251) */
+        .star-wrapper { position: absolute; pointer-events: none; z-index: 100; transform: translate(-50%, -50%); }
+        .big-star { font-size: 45px; filter: drop-shadow(0 0 15px rgba(255, 223, 0, 0.9)); animation: starStay 1s ease-out forwards; }
+        .star-text { position: absolute; top: -30px; left: 50%; transform: translateX(-50%); color: var(--glow-pink); font-size: 14px; white-space: nowrap; animation: textFloat 2s ease-out forwards; font-weight: 600; }
+
+        @keyframes starStay { 0% { transform: scale(0); opacity: 0; } 50% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes textFloat { 0% { opacity: 0; transform: translate(-50%, 0); } 20% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -40px); } }
+
+        /* Screens */
+        .screen { display: none; height: 100vh; width: 100vw; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; animation: fadeIn 0.8s ease; position: relative; z-index: 10; }
+        .active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        .highlight { color: var(--glow-pink); font-family: 'Dancing Script', cursive; font-size: 45px; }
+        .btn { background: rgba(61, 3, 37, 0.6); color: white; border: 1px solid rgba(255, 126, 179, 0.3); padding: 12px 40px; border-radius: 50px; cursor: pointer; font-size: 16px; backdrop-filter: blur(5px); transition: 0.3s; z-index: 20; }
+
+        /* Importance Meter (IMG_0253) */
+        .heart-ring { width: 180px; height: 180px; border: 2px solid rgba(255,255,255,0.1); border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 20px; position: relative; }
+        .filling-heart { font-size: 60px; color: var(--accent-pink); filter: drop-shadow(0 0 10px var(--accent-pink)); transition: transform 0.1s; }
+        .percent { font-size: 28px; font-weight: 600; color: var(--glow-pink); margin-top: 10px; }
+
+        /* Final Modal (IMG_0256) */
+        #final-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 1, 17, 0.95); z-index: 100; justify-content: center; align-items: center; padding: 30px; box-sizing: border-box; }
+        .modal-content { background: #1a0212; color: white; border: 1px solid #ff4d6d; border-radius: 30px; padding: 40px 25px; max-width: 400px; position: relative; }
+        
+        @keyframes orbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body onclick="handleGlobalClick(event)">
+
+    <div id="stars-container"></div>
+
+    <div id="page1" class="screen active">
+        <div style="font-size: 70px; filter: drop-shadow(0 0 10px var(--accent-pink)); margin-bottom: 20px;">❤️</div>
+        <h1>Hey <span class="highlight">Cutiepie...</span></h1>
+        <p>I made something for you because I want to tell you something important.</p>
+        <button class="btn" onclick="event.stopPropagation(); showPage('page2')">Open it →</button>
+    </div>
+
+    <div id="page2" class="screen">
+        <h1 id="story-text" style="font-weight: 300; padding: 0 20px;">Sometimes life gets a little dark...</h1>
+        <p id="tap-hint" style="color: #6b0f42; font-size: 13px;">Tap 3 times on the screen</p>
+        <button id="next-btn" class="btn" style="display:none; margin-top: 20px;" onclick="event.stopPropagation(); clearStars(); showPage('page3')">Continue →</button>
+    </div>
+
+    <div id="page3" class="screen">
+        <h1>How important are you to me?</h1>
+        <div class="heart-ring">
+            <div id="meter-heart" class="filling-heart">🤍</div>
+        </div>
+        <div id="percent-display" class="percent">0%</div>
+        <button class="btn" style="background: linear-gradient(45deg, #ff4d6d, #a333ff); border: none;" 
+                onmousedown="startHold()" onmouseup="stopHold()" 
+                ontouchstart="startHold()" ontouchend="stopHold()">
+            Press and Hold
+        </button>
+    </div>
+
+    <div id="page4" class="screen">
+        <div style="position: relative; width: 220px; height: 220px; background: rgba(255, 77, 109, 0.1); border-radius: 25px; border: 1px solid rgba(255, 77, 109, 0.3); display: flex; justify-content: center; align-items: center; cursor: pointer;" onclick="event.stopPropagation(); revealLetter()">
+            <div style="position: absolute; top: -15px; right: -15px; width: 50px; height: 50px; background: #e096ff; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 24px;">🤍</div>
+            <div style="font-size: 80px; color: #ff7eb3;">✉️</div>
+        </div>
+        <p style="margin-top: 25px; color: #bbb;">Tap to open your letter</p>
+    </div>
+
+    <div id="final-modal">
+        <div class="modal-content">
+            <div style="position: absolute; top: -25px; left: 50%; transform: translateX(-50%); width: 50px; height: 50px; background: #ff4d6d; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 24px;">❤️</div>
+            <h2 style="color: #ff7eb3; font-size: 22px;">To my favorite person,</h2>
+            <div style="line-height: 1.6; font-size: 14px; color: #ddd; text-align: left; margin: 20px 0;">
+                <p>I wanted to write this down because sometimes just saying it isn't enough. You need to know exactly how important you are to me.</p>
+                <p>Before you came along, things were fine. But with you? Everything is just brighter. Your laugh is my favorite sound, and your presence is my absolute safest space.</p>
+                <p style="color: #ff4d6d; font-family: 'Dancing Script'; font-size: 20px; text-align: right;">Yours entirely, always.</p>
+            </div>
+            <button class="btn" style="width: 100%;" onclick="showUniverse()">One last thing →</button>
+        </div>
+    </div>
+
+    <div id="page5" class="screen">
+        <div style="position: relative; width: 250px; height: 250px; display: flex; justify-content: center; align-items: center; margin-bottom: 20px;">
+            <div style="position: absolute; width: 100%; height: 100%; border: 1px solid rgba(255, 126, 179, 0.2); border-radius: 50%;"></div>
+            <div style="font-size: 80px; filter: drop-shadow(0 0 20px #ff4d6d);">💖</div>
+            <div style="position: absolute; animation: orbit 8s linear infinite; width: 100%; height: 100%;"><div style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); font-size: 20px;">⭐</div></div>
+        </div>
+        <h1 style="font-size: 28px;">You are my <span style="color: #c084fc;">universe</span></h1>
+        <p style="color: #bbb;">You mean more to me than you know.</p>
+        <button class="btn" style="margin-top: 20px; border: 1px solid #ff4d6d;" onclick="alert('Hug Sent! ❤️')">🚀 Send a hug</button>
+    </div>
+
+    <script>
+        // Background creation
+        const starsContainer = document.getElementById('stars-container');
+        for (let i = 0; i < 70; i++) {
+            const s = document.createElement('div');
+            s.className = 'tiny-star';
+            s.style.width = s.style.height = Math.random() * 2 + 'px';
+            s.style.left = Math.random() * 100 + 'vw';
+            s.style.top = Math.random() * 100 + 'vh';
+            s.style.setProperty('--duration', Math.random() * 3 + 2 + 's');
+            starsContainer.appendChild(s);
+        }
+
+        let starCount = 0;
+
+        function handleGlobalClick(e) {
+            if (!document.getElementById('page2').classList.contains('active')) return;
+
+            // 1. Create Star Wrapper
+            const wrapper = document.createElement('div');
+            wrapper.className = 'star-wrapper';
+            wrapper.style.left = e.clientX + 'px';
+            wrapper.style.top = e.clientY + 'px';
+
+            // 2. Add Star Icon
+            const star = document.createElement('div');
+            star.className = 'big-star';
+            star.innerHTML = '⭐';
+            
+            // 3. Add "You showed up" text
+            const text = document.createElement('div');
+            text.className = 'star-text';
+            text.innerText = 'you showed up';
+
+            wrapper.appendChild(star);
+            wrapper.appendChild(text);
+            document.body.appendChild(wrapper);
+
+            // Auto-remove individual stars after 4 seconds
+            setTimeout(() => { if(wrapper.parentNode) wrapper.remove(); }, 4000);
+            
+            starCount++;
+            const txt = document.getElementById('story-text');
+            const hint = document.getElementById('tap-hint');
+            const btn = document.getElementById('next-btn');
+
+            if (starCount === 1) { txt.innerText = "You show up."; } 
+            else if (starCount === 2) { txt.innerText = "And everything lights up."; } 
+            else if (starCount === 3) { hint.style.display = 'none'; btn.style.display = 'inline-block'; }
+        }
+
+        // Specifically clear all stars when leaving the page
+        function clearStars() {
+            document.querySelectorAll('.star-wrapper').forEach(s => s.remove());
+        }
+
+        function showPage(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        let holdInt, pct = 0;
+        function startHold() {
+            holdInt = setInterval(() => {
+                if (pct < 100) {
+                    pct++;
+                    document.getElementById('percent-display').innerText = pct + "%";
+                    document.getElementById('meter-heart').style.transform = `scale(${1 + pct/100})`;
+                    if(pct > 20) document.getElementById('meter-heart').innerText = "❤️";
+                } else {
+                    clearInterval(holdInt);
+                    setTimeout(() => showPage('page4'), 500);
+                }
+            }, 30);
+        }
+        function stopHold() { clearInterval(holdInt); }
+
+        function revealLetter() { document.getElementById('final-modal').style.display = 'flex'; }
+        function showUniverse() {
+            document.getElementById('final-modal').style.display = 'none';
+            showPage('page5');
+        }
+    </script>
+</body>
+</html>
